@@ -3,7 +3,15 @@ const router = express.Router();
 const serieController = require('../controllers/serieController');
 const auth = require('../middleware/auth');
 
-router.get('/',auth,serieController.getSeries);
-//router.post('/', serieController.addMovie);
+
+// Rota para buscar todas as séries
+router.get('/', auth, serieController.getSeries);
+
+// Rota para buscar uma série pelo ID
+router.get('/:id', auth, serieController.getSeriesById);
+
+// Rota para buscar episódios de uma série pelo ID
+router.get('/:id/episodes', auth, serieController.getEpisodesBySeriesId);
+
 
 module.exports = router;
