@@ -1,0 +1,1 @@
+Its an API made in node.js and express to a netflix like app, i added auth methods to the routes, validation with jwt tokens, login and register routes, methods to list movies and series. Need to add some routes to add and update movies and series
