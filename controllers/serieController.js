@@ -49,3 +49,68 @@ exports.getEpisodesBySeriesId = async (req, res) => {
       res.status(500).json({ error: error.message });
     }
   };
+
+
+  exports.addSeries = async (req, res) => {
+    const { title, description, duration, age_rating, cover_image_url, video_url, episode_count } = req.body;
+
+    try {
+        const result = await db.query(
+            'INSERT INTO series (title, description, duration, age_rating, cover_image_url, video_url, episode_count) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [title, description, duration, age_rating, cover_image_url, video_url, episode_count]
+        );
+
+        res.json({ message: 'Series added successfully!', seriesId: result[0].insertId });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
+
+
+exports.updateSeries = async (req, res) => {
+  const { series_id, title, description, duration, age_rating, cover_image_url, video_url, episode_count } = req.body;
+
+  if (!series_id) {
+      return res.status(400).json({ error: "Series ID is required." });
+  }
+
+  try {
+      const result = await db.query(
+          'UPDATE series SET title = ?, description = ?, duration = ?, age_rating = ?, cover_image_url = ?, video_url = ?, episode_count = ?, updated_at = NOW() WHERE series_id = ?',
+          [title, description, duration, age_rating, cover_image_url, video_url, episode_count, series_id]
+      );
+
+      if (result[0].affectedRows === 0) {
+          return res.status(404).json({ message: "Series not found!" });
+      }
+
+      res.json({ message: 'Series updated successfully!' });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+
+exports.deleteSeries = async (req, res) => {
+  const { series_id } = req.body;
+
+  if (!series_id) {
+      return res.status(400).json({ error: "Series ID is required." });
+  }
+
+  try {
+      const result = await db.query(
+          'DELETE FROM series WHERE series_id = ?',
+          [series_id]
+      );
+
+      if (result[0].affectedRows === 0) {
+          return res.status(404).json({ message: "Series not found!" });
+      }
+
+      res.json({ message: 'Series deleted successfully!' });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
