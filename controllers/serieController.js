@@ -9,6 +9,20 @@ exports.getSeries = async (req, res) => {
     }
 };
 
+exports.getSeriesNames = async (req, res) => {
+  try {
+    // Supondo que a coluna correta para o identificador seja 'series_id'
+    const [seriesNames] = await db.query('SELECT title FROM series');
+    console.log(seriesNames);
+    res.json(seriesNames); // Retorna os títulos das séries
+  } catch (error) {
+    console.error("Erro ao buscar os títulos das séries:", error);
+    res.status(500).json({ error: error.message }); // Exibe o erro no formato JSON
+  }
+};
+
+
+
 exports.getSeriesById = async (req, res) => {
   const { id } = req.params; // Obter o ID da série da URL
 
@@ -52,19 +66,31 @@ exports.getEpisodesBySeriesId = async (req, res) => {
 
 
   exports.addSeries = async (req, res) => {
-    const { title, description, duration, age_rating, cover_image_url, video_url, episode_count } = req.body;
+    const { title, description, duration, age_rating, cover_image_url, video_url, episode_count, genres } = req.body;
+
+    // Verificando se o campo 'genres' é uma string ou array de gêneros, caso seja um array, transformamos em string separada por vírgulas
+    let genresString = "";
+    if (Array.isArray(genres)) {
+        genresString = genres.join(","); // Transformando o array em uma string separada por vírgulas
+    } else {
+        genresString = genres; // Caso já seja uma string, mantemos como está
+    }
 
     try {
+        // Inserindo dados na tabela 'series'
         const result = await db.query(
-            'INSERT INTO series (title, description, duration, age_rating, cover_image_url, video_url, episode_count) VALUES (?, ?, ?, ?, ?, ?, ?)',
-            [title, description, duration, age_rating, cover_image_url, video_url, episode_count]
+            'INSERT INTO series (title, description, duration, age_rating, cover_image_url, video_url, episode_count, genres) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            [title, description, duration, age_rating, cover_image_url, video_url, episode_count, genresString]
         );
 
+        // Resposta de sucesso, com o ID da série inserida
         res.json({ message: 'Series added successfully!', seriesId: result[0].insertId });
     } catch (error) {
+        // Caso haja um erro, retornamos o erro
         res.status(500).json({ error: error.message });
     }
 };
+
 
 
 exports.updateSeries = async (req, res) => {

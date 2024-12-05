@@ -15,6 +15,9 @@ router.get('/:id', auth, serieController.getSeriesById);
 router.get('/:id/episodes', auth, serieController.getEpisodesBySeriesId);
 
 
+router.get('/names', auth, serieController.getSeriesNames);
+
+
 router.post('/', auth, serieController.addSeries);
 router.put('/', auth, serieController.updateSeries);
 router.delete('/', auth, serieController.deleteSeries);

@@ -80,3 +80,51 @@ exports.getGenresCountTotal = async (req, res) => {
     }
 };
 
+exports.getContentmediumDuration = async (req, res) => {
+    try {
+        // Query para calcular a soma das durações e a contagem de filmes
+        const [moviesResult] = await db.query(`
+            SELECT 
+                SUM(duration) AS total_duration,
+                COUNT(*) AS total_movies
+            FROM movies
+        `);
+
+        // Query para calcular a soma das durações e a contagem de episódios
+        const [episodesResult] = await db.query(`
+            SELECT 
+                SUM(duration) AS total_duration,
+                COUNT(*) AS total_episodes
+            FROM episodes
+        `);
+
+        // Verificando se há filmes e episódios
+        if (moviesResult[0].total_movies > 0 && episodesResult[0].total_episodes > 0) {
+            // Calculando a média de duração de filmes
+            const averageMovieDuration = moviesResult[0].total_duration / moviesResult[0].total_movies;
+            // Arredondando a média de duração dos filmes
+            const roundedMovieDuration = Math.round(averageMovieDuration);
+
+            // Calculando a média de duração dos episódios
+            const averageEpisodeDuration = episodesResult[0].total_duration / episodesResult[0].total_episodes;
+            // Arredondando a média de duração dos episódios
+            const roundedEpisodeDuration = Math.round(averageEpisodeDuration);
+
+            // Retornando as durações médias de filmes e episódios
+            res.json({
+                average_movie_duration: roundedMovieDuration,
+                average_episode_duration: roundedEpisodeDuration
+            });
+        } else {
+            // Caso não haja filmes ou episódios, retornando um erro
+            res.status(404).json({ message: 'Nenhum filme ou episódio encontrado' });
+        }
+
+    } catch (error) {
+        console.error('Erro ao buscar dados:', error);
+        res.status(500).json({ error: 'Erro interno no servidor' });
+    }
+};
+
+
+
