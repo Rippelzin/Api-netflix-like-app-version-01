@@ -9,12 +9,33 @@ exports.getMovies = async (req, res) => {
     }
 };
 
+exports.getMovieByName = async(req,res) => {
+    const {title} = req.body
+    try{
+        const movie = await db.query("SELECT * FROM movies WHERE title = ? LIMIT 1",
+            [title]
+        )
+        res.json(movie)
+    }catch(error) {
+        res.status(500).json({error: error.message})
+    }
+}
+
+exports.getMoviesNames = async (req, res) => {
+    try{
+        const [moviesNames] = await db.query('SELECT title FROM movies');
+        res.json(moviesNames)
+    }catch(error){
+        res.status(500).json({error: error.message})
+    }
+}
+
 exports.addMovie = async (req, res) => {
-    const { title, description, duration, age_rating, cover_image_url, video_url } = req.body;
+    const { title, description, duration, age_rating, cover_image_url, video_url, genres } = req.body;
     try {
         const result = await db.query(
-            'INSERT INTO movies (title, description, duration, age_rating, cover_image_url, video_url) VALUES (?, ?, ?, ?, ?, ?)',
-            [title, description, duration, age_rating, cover_image_url, video_url]
+            'INSERT INTO movies (title, description, duration, age_rating, cover_image_url, video_url, genres) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            [title, description, duration, age_rating, cover_image_url, video_url, genres]
         );
         res.json({ message: 'Movie added successfully!', movieId: result[0].insertId });
     } catch (error) {
@@ -23,13 +44,13 @@ exports.addMovie = async (req, res) => {
 };
 
 exports.updateMovie = async (req, res) => {
-    const { movie_id, title, description, duration, age_rating, cover_image_url, video_url } = req.body;
+    const { movie_id, title, description, duration, age_rating, cover_image_url, video_url, genres } = req.body;
 
     try {
         // Atualiza o filme com base no movie_id
         const result = await db.query(
-            'UPDATE movies SET title = ?, description = ?, duration = ?, age_rating = ?, cover_image_url = ?, video_url = ?, updated_at = NOW() WHERE movie_id = ?',
-            [title, description, duration, age_rating, cover_image_url, video_url, movie_id]
+            'UPDATE movies SET title = ?, description = ?, duration = ?, age_rating = ?, cover_image_url = ?, video_url = ?, genres = ? , updated_at = NOW() WHERE movie_id = ?',
+            [title, description, duration, age_rating, cover_image_url, video_url,genres, movie_id]
         );
 
         // Verifica se o filme foi atualizado
